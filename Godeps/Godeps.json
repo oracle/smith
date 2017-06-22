@@ -1,0 +1,57 @@
+{
+	"ImportPath": "github.com/oracle/smith",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.10.0",
+			"Rev": "4b6ea7319e214d98c938f12692336f7ca9348d6b"
+		},
+		{
+			"ImportPath": "github.com/ghodss/yaml",
+			"Comment": "v1.0.0",
+			"Rev": "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/kr/pty",
+			"Comment": "v1.0.0",
+			"Rev": "2c10821df3c3cf905230d078702dfbe9404c9b23"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/go-digest",
+			"Comment": "v1.0.0-rc0",
+			"Rev": "aa2ec055abd10d26d539eb630a92241b781ce4bc"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/image-spec/specs-go",
+			"Comment": "v1.0.0-rc6",
+			"Rev": "1a6593ab6c3ab5902072b4694a22ff19425396ae"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/image-spec/specs-go/v1",
+			"Comment": "v1.0.0-rc6",
+			"Rev": "1a6593ab6c3ab5902072b4694a22ff19425396ae"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "7aeaa2cce6ae7e18d2a6ee597b60ee137e999bd9"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "d16db1e50e33dff1b6cdf37596cef36742128670"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "a3f3340b5840cee44f372bddb5880fcbc419b46a"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "493114f68206f85e7e333beccfabc11e98cba8dd"
+		}
+	]
+}
