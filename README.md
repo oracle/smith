@@ -1,9 +1,13 @@
 # `smith` - microcontainer builder #
 
+![smith](https://github.com/oracle/smith/raw/master/smith.png
+"smith")
+
 ## What is `smith`? ##
 
-`smith` is a simple command line utility for building microcontainers from rpm
-packages or oci images.
+`smith` is a simple command line utility for building
+[microcontainers](https://blogs.oracle.com/developers/the-microcontainer-manifesto)
+from rpm packages or oci images.
 
 ## Principles of microcontainers ##
 
