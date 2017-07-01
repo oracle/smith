@@ -595,6 +595,12 @@ func extractLayer(layer *Layer, outDir string) error {
 			os.MkdirAll(path, 0755)
 		case tar.TypeSymlink:
 			os.Symlink(hdr.Linkname, path)
+		case tar.TypeLink:
+			target := hdr.Linkname
+			if filepath.IsAbs(target) {
+				target = filepath.Join(outDir, target)
+			}
+			os.Link(target, path)
 		case tar.TypeReg:
 			// normalize permissions
 			perm := int64(0644)
@@ -607,7 +613,7 @@ func extractLayer(layer *Layer, outDir string) error {
 				return err
 			}
 		default:
-			logrus.Infof("Skipping unknown file type: %s", clean)
+			logrus.Infof("Skipping unknown file type %v for %s", hdr.Typeflag, clean)
 		}
 	}
 	return nil
