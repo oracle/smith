@@ -151,6 +151,8 @@ func downloadContainer(outName, remote string, insecure bool) bool {
 		return false
 	}
 
+	// add some metadata
+	image.Metadata = getMetadata()
 	if err := WriteOciTarGz(image, outName); err != nil {
 		logrus.Errorf("Failed to write image to %s: %v", outName, err)
 		return false

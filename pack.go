@@ -335,11 +335,11 @@ type Layer struct {
 
 // ImageMetadata stores metadata such as build time
 type ImageMetadata struct {
-	Buildno      string
-	BuildHost    string
-	BuildTime    time.Time
-	SmithVersion string
-	SmithSha     string
+	Buildno   string
+	BuildHost string
+	BuildTime time.Time
+	SmithVer  string
+	SmithSha  string
 }
 
 type Image struct {
@@ -515,9 +515,11 @@ func WriteOciTar(image *Image, out io.Writer) error {
 		latest.Annotations["org.opencontainers.ref.name"] = "latest"
 		created := image.Metadata.BuildTime.Format(time.RFC3339)
 		latest.Annotations["org.opencontainers.created"] = created
-		latest.Annotations["com.oracle.smith.version"] = image.Metadata.SmithVersion
+		latest.Annotations["com.oracle.smith.version"] = image.Metadata.SmithVer
 		latest.Annotations["com.oracle.smith.sha"] = image.Metadata.SmithSha
-		latest.Annotations["com.oracle.smith.build"] = image.Metadata.Buildno
+		if image.Metadata.Buildno != "" {
+			latest.Annotations["com.oracle.smith.build"] = image.Metadata.Buildno
+		}
 	}
 	platform := v1.Platform{Architecture: runtime.GOARCH, OS: runtime.GOOS}
 	latest.Platform = &platform
@@ -525,7 +527,7 @@ func WriteOciTar(image *Image, out io.Writer) error {
 
 	// build entries for the rest of the blobs
 	annotations := map[string]string{}
-	if image.Metadata != nil {
+	if image.Metadata != nil && image.Metadata.Buildno != "" {
 		annotations["com.oracle.smith.build"] = image.Metadata.Buildno
 	}
 	for i, b := range image.AdditionalBlobs {

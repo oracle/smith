@@ -85,6 +85,14 @@ func installPackage(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) (
 	}
 }
 
+func getMetadata() *ImageMetadata {
+	return &ImageMetadata{
+		SmithVer:  ver,
+		SmithSha:  sha,
+		BuildTime: time.Now().UTC(),
+	}
+}
+
 func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	outpath, err := filepath.Abs(tarfile)
 	if err != nil {
@@ -183,11 +191,8 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 
 	// write build metadata
 	extraBlobs := []OpaqueBlob{}
-	metadata := ImageMetadata{}
+	metadata := getMetadata()
 	metadata.Buildno = buildOpts.buildNo
-	metadata.SmithVersion = ver
-	metadata.SmithSha = sha
-	metadata.BuildTime = time.Now().UTC()
 	if hostname, err := os.Hostname(); err == nil {
 		metadata.BuildHost = hostname
 	}
@@ -219,7 +224,7 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 
 	// pack
 	logrus.Infof("Packing image into %v", outpath)
-	if err := WriteOciFromBuild(pkg, buildDir, outpath, &metadata, extraBlobs); err != nil {
+	if err := WriteOciFromBuild(pkg, buildDir, outpath, metadata, extraBlobs); err != nil {
 		logrus.Infof("Failed to pack dir into %v: %v", outpath, err)
 		return false
 	}
