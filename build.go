@@ -365,6 +365,9 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 	if len(pkg.Dir) == 0 {
 		pkg.Dir = image.Config.Config.WorkingDir
 	}
+	if len(pkg.Ports) == 0 {
+		pkg.Ports = image.Config.Config.ExposedPorts
+	}
 
 	if !buildOpts.fast {
 		// remove directory

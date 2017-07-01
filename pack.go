@@ -142,7 +142,12 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	config.Config.Cmd = def.Cmd
 	config.Config.Env = def.Env
 	config.Config.WorkingDir = def.Dir
-	config.Config.User = strconv.Itoa(ID_START)
+	config.Config.ExposedPorts = def.Ports
+	if def.Root {
+		config.Config.User = "0"
+	} else {
+		config.Config.User = strconv.Itoa(ID_START)
+	}
 	for _, vol := range def.Mounts {
 		config.Config.Volumes[vol] = struct{}{}
 	}
