@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	ID_START = 10
+	// IDStart is the userid of the first smith user
+	IDStart = 10
 )
 
 // Users populates the passwd, group and nsswitch.conf
@@ -36,7 +37,7 @@ func Users(outputDir string, users []string) error {
 		"daemon:x:2:0:daemon:/bin:",
 	}
 	for i, user := range users {
-		s = append(s, fmt.Sprintf("%s:x:%d:0:%s:/write:", user, ID_START+i, user))
+		s = append(s, fmt.Sprintf("%s:x:%d:0:%s:/write:", user, IDStart+i, user))
 	}
 	path := filepath.Join(etcDir, "passwd")
 	if err := ioutil.WriteFile(path, []byte(strings.Join(s, "\n")), 0644); err != nil {

@@ -53,7 +53,7 @@ func tarWriteFunc(baseDir string, tarOut *tar.Writer) filepath.WalkFunc {
 		}
 		header := new(tar.Header)
 		header.Name = rpath
-		header.Uid = ID_START
+		header.Uid = IDStart
 		header.Mode = int64(info.Mode().Perm())
 		header.ModTime = time.Time{}
 		if info.IsDir() {
@@ -146,7 +146,7 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	if def.Root {
 		config.Config.User = "0"
 	} else {
-		config.Config.User = strconv.Itoa(ID_START)
+		config.Config.User = strconv.Itoa(IDStart)
 	}
 	for _, vol := range def.Mounts {
 		config.Config.Volumes[vol] = struct{}{}

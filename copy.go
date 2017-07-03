@@ -193,10 +193,9 @@ func copier(exs map[string]struct{}, chrootDir, outputDir string, nss, follow bo
 			if follow || info.IsDir() {
 				logrus.Debugf("Path %v already exists", outpath)
 				return nil
-			} else {
-				logrus.Debugf("Overwriting %v", outpath)
-				os.RemoveAll(outpath)
 			}
+			logrus.Debugf("Overwriting %v", outpath)
+			os.RemoveAll(outpath)
 		}
 		base := outpath
 		if !info.IsDir() {

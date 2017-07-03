@@ -198,9 +198,9 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	}
 
 	// write the normalized config to metadata
-	smithJson, err := json.Marshal(pkg)
+	smithJSON, err := json.Marshal(pkg)
 	if err == nil {
-		newBlob := OpaqueBlob{"application/vnd.smith.spec+json", smithJson}
+		newBlob := OpaqueBlob{"application/vnd.smith.spec+json", smithJSON}
 		extraBlobs = append(extraBlobs, newBlob)
 	}
 

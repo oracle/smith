@@ -191,14 +191,14 @@ func extractAuth(resp *http.Response, info *RepoInfo) error {
 	val := resp.Header.Get("WWW-Authenticate")
 	parts := strings.Fields(val)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return fmt.Errorf("Invalid WWW-Authenticate header: '%s'.", val)
+		return fmt.Errorf("invalid WWW-Authenticate header: '%s'", val)
 	}
 	keyvals := strings.Split(parts[1], ",")
 	items := map[string]string{}
 	for _, keyval := range keyvals {
 		pieces := strings.Split(keyval, "=")
 		if len(pieces) != 2 {
-			return fmt.Errorf("Invalid value in WWW-Authenticate header: '%s'.", val)
+			return fmt.Errorf("invalid value in WWW-Authenticate header: '%s'", val)
 		}
 		// strip quotes
 		if pieces[1][0] == '"' || pieces[1][0] == '\'' {
@@ -209,11 +209,11 @@ func extractAuth(resp *http.Response, info *RepoInfo) error {
 	}
 	info.Auth = items["realm"]
 	if info.Auth == "" {
-		return fmt.Errorf("Realm not found in WWW-Authenticate header: '%s'.", val)
+		return fmt.Errorf("realm not found in WWW-Authenticate header: '%s'", val)
 	}
 	info.Service = items["service"]
 	if info.Auth == "" {
-		return fmt.Errorf("Service not found in WWW-Authenticate header: '%s'.", val)
+		return fmt.Errorf("service not found in WWW-Authenticate header: '%s'", val)
 	}
 	return nil
 }
@@ -235,16 +235,16 @@ func (r *RegistryClient) PrepPutObject(info *RepoInfo, path string) (string, err
 		}
 	}
 	digest := path[len("blobs/"):]
-	postUrl := fmt.Sprintf("%s://%s/v2/%s/blobs/uploads/",
+	postURL := fmt.Sprintf("%s://%s/v2/%s/blobs/uploads/",
 		info.Scheme, info.Host, info.Reponame)
-	req, err := http.NewRequest("POST", postUrl, nil)
+	req, err := http.NewRequest("POST", postURL, nil)
 	if err != nil {
 		return "", err
 	}
 	if info.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+info.Token)
 	}
-	logrus.Debugf("Prepping put to %s", postUrl)
+	logrus.Debugf("Prepping put to %s", postURL)
 	resp, err := r.Client.Do(req)
 	if err != nil {
 		return "", err
@@ -269,20 +269,20 @@ func (r *RegistryClient) PrepPutObject(info *RepoInfo, path string) (string, err
 		return "", fmt.Errorf("Blobs post returned invalid response %d:\n%s",
 			resp.StatusCode, string(buf.Bytes()))
 	}
-	uploadUrl := resp.Header.Get("Location")
-	if uploadUrl == "" {
+	uploadURL := resp.Header.Get("Location")
+	if uploadURL == "" {
 		return "", fmt.Errorf("Repository did not return an upload url")
 	}
-	if strings.HasPrefix(uploadUrl, "/") {
-		uploadUrl = fmt.Sprintf("%s://%s%s", info.Scheme, info.Host, uploadUrl)
+	if strings.HasPrefix(uploadURL, "/") {
+		uploadURL = fmt.Sprintf("%s://%s%s", info.Scheme, info.Host, uploadURL)
 	}
-	if strings.Contains(uploadUrl, "?") {
-		uploadUrl += "&digest=" + digest
+	if strings.Contains(uploadURL, "?") {
+		uploadURL += "&digest=" + digest
 	} else {
-		uploadUrl += "?digest=" + digest
+		uploadURL += "?digest=" + digest
 	}
-	logrus.Debugf("Got %s for %s", uploadUrl, path)
-	return uploadUrl, nil
+	logrus.Debugf("Got %s for %s", uploadURL, path)
+	return uploadURL, nil
 }
 
 // PutObject puts an object to the repo in "info" at the path in "path".
