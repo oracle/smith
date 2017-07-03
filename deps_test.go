@@ -1,11 +1,12 @@
 package main
 
 import (
-	"oracle/execute"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/oracle/smith/execute"
 )
 
 func dependenciesEqual(t *testing.T, a, b map[string]struct{}) {
