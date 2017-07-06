@@ -126,6 +126,12 @@ your smith.yaml as package, for example:
     - /usr/bin/cat
     - /read/data
 
+## Advanced Usage ##
+
+For more detailed instructions on building containers, check out [How To Build
+a Tiny Httpd
+Container](https://hackernoon.com/how-to-build-a-tiny-httpd-container-ae622c37db39)
+
 ## Upload ##
 
 You can upload your image to a docker repository:
