@@ -172,7 +172,7 @@ func imageFromRemote(remote string, insecure bool) (*Image, error) {
 
 // ImageFromRepo gets an image from a repository.
 func (r *RegistryClient) ImageFromRepo(info *RepoInfo) (*Image, error) {
-	return imageFromDigest(r.ImageGetter(info), "manifest")
+	return imageFromDigest(r.ImageGetter(info), "manifest", nil)
 }
 
 // ImageGetter returns a function which gets an object from the

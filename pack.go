@@ -292,7 +292,7 @@ func digestExtractor(tarfile string) Extractor {
 
 type Extractor func(digest gdigest.Digest) ([]byte, error)
 
-func imageFromDigest(extract Extractor, digest gdigest.Digest) (*Image, error) {
+func imageFromDigest(extract Extractor, digest gdigest.Digest, annotations map[string]string) (*Image, error) {
 	manb, err := extract(digest)
 	if err != nil {
 		return nil, err
@@ -314,6 +314,18 @@ func imageFromDigest(extract Extractor, digest gdigest.Digest) (*Image, error) {
 	}
 	if len(manifest.Layers) != len(config.RootFS.DiffIDs) {
 		return nil, fmt.Errorf("number of layers and number of diffIDs don't match")
+	}
+	// smith doesn't set created in the config so that the SHA of the config
+	// is deterministic, but other tools use the created value. Set Created from
+	// the annotations when unpacking to make registries happy upon upload.
+	if config.Created == nil {
+		strval := manifest.Annotations["org.opencontainers.created"]
+		if strval == "" {
+			strval = annotations["org.opencontainers.created"]
+		}
+		if created, err := time.Parse(time.RFC3339, strval); err == nil {
+			config.Created = &created
+		}
 	}
 	layers := []*Layer{}
 	for i := range manifest.Layers {
@@ -375,17 +387,19 @@ func imageFromFile(path string) (*Image, error) {
 	if err := json.Unmarshal(refb, &ref); err != nil {
 		return nil, fmt.Errorf("error unmarshaling index.json from %s", tarpath)
 	}
-	var digest gdigest.Digest
+	digest := gdigest.Digest("")
+	annotations := map[string]string{}
 	for _, defn := range ref.Manifests {
 		if defn.Annotations["org.opencontainers.ref.name"] == tag {
 			digest = defn.Digest
+			annotations = defn.Annotations
 		}
 	}
 	if digest == "" {
 		return nil, fmt.Errorf("unable to locate image named %s in index", tag)
 	}
 	logrus.Debugf("%s in %s is id %s", tag, path, digest)
-	return imageFromDigest(digestExtractor(tarpath), digest)
+	return imageFromDigest(digestExtractor(tarpath), digest, annotations)
 }
 
 func imageFromBuild(def *ConfigDef, baseDir string) (*Image, error) {
