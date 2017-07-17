@@ -332,17 +332,6 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 	uid, gid := os.Getuid(), os.Getgid()
 	unpackDir := filepath.Join(os.TempDir(), "smith-unpack-"+strconv.Itoa(uid))
 
-	executor := func(name string, arg ...string) (string, string, error) {
-		attr := &syscall.SysProcAttr{
-			Chroot: unpackDir,
-		}
-		attr, err := setAttrMappings(attr, uid, gid)
-		if err != nil {
-			return "", "", err
-		}
-		return execute.AttrExecuteQuiet(attr, name, arg...)
-	}
-
 	var image *Image
 	var err error
 	if strings.HasPrefix(pkg.Package, "http://") ||
@@ -368,13 +357,51 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 	if len(pkg.Ports) == 0 {
 		pkg.Ports = image.Config.Config.ExposedPorts
 	}
-
 	if !buildOpts.fast {
 		// remove directory
 		logrus.Infof("Removing %v", unpackDir)
 		if err := os.RemoveAll(unpackDir); err != nil {
 			logrus.Infof("Failed to remove %v: %v", unpackDir, err)
 		}
+	}
+
+	// set path for executor
+	path := "/usr/sbin:/usr/bin:/sbin:/bin"
+	for _, e := range pkg.Env {
+		if strings.HasPrefix(e, "PATH=") {
+			path = e[len("PATH="):]
+		}
+	}
+	executor := func(name string, arg ...string) (string, string, error) {
+		attr := &syscall.SysProcAttr{
+			Chroot: unpackDir,
+		}
+		attr, err := setAttrMappings(attr, uid, gid)
+		if err != nil {
+			return "", "", err
+		}
+
+		// find the executable using path in chroot
+		// note that this does not resolve symlinks properly
+		if !strings.Contains(name, "/") {
+			for _, dir := range filepath.SplitList(path) {
+				if dir == "" {
+					// Unix shell semantics: path element "" means "."
+					dir = "."
+				}
+				path := filepath.Join(unpackDir, dir, name)
+				d, err := os.Stat(path)
+				if err != nil {
+					continue
+				}
+				if m := d.Mode(); m.IsDir() || m&0111 == 0 {
+					continue
+				}
+				name = path[len(unpackDir):]
+				break
+			}
+		}
+		return execute.AttrExecuteQuiet(attr, name, arg...)
 	}
 
 	// only unpack if the directory doesn't already exist
