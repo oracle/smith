@@ -381,8 +381,9 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 			return "", "", err
 		}
 
-		// find the executable using path in chroot
-		// note that this does not resolve symlinks properly
+		// Rind the executable using path in chroot. Note that this will accept a
+		// symlink even if it is dangling
+
 		if !strings.Contains(name, "/") {
 			for _, dir := range filepath.SplitList(path) {
 				if dir == "" {
@@ -390,7 +391,7 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 					dir = "."
 				}
 				path := filepath.Join(unpackDir, dir, name)
-				d, err := os.Stat(path)
+				d, err := os.Lstat(path)
 				if err != nil {
 					continue
 				}
