@@ -609,6 +609,13 @@ func extractLayer(layer *Layer, outDir string) error {
 		}
 
 		path := filepath.Join(outDir, clean)
+		info, err := os.Lstat(path)
+		// remove any existing file at the location unless both locations are a dir
+		if err == nil && !(hdr.Typeflag == tar.TypeDir && info.IsDir()) {
+			if err := os.RemoveAll(path); err != nil {
+				logrus.Warnf("Failed to remove %s", path)
+			}
+		}
 		switch hdr.Typeflag {
 		case tar.TypeDir:
 			os.MkdirAll(path, 0755)
