@@ -69,6 +69,13 @@ Installing can be done via the Makefile:
 
     sudo make install
 
+
+## Installing `smith` using a Docker container ##
+
+```bash
+docker build -t smith .
+```
+
 ## Using `smith` ##
 
 To use smith, simply create a smith.yaml defining your container and run
@@ -100,6 +107,45 @@ parameters:
     echo "Hello World!" >rootfs/read/data
 
     smith
+    
+## Build using a Docker container ##
+
+Run the container mounting `smith.yaml` folder:
+
+```bash
+mkdir cat
+cd cat
+
+cat >smith.yaml <<EOF
+package: coreutils
+paths:
+- /usr/bin/cat
+cmd:
+- /usr/bin/cat
+- /read/data
+EOF
+
+mkdir -p rootfs/read
+echo "Hello World!" >rootfs/read/data
+```
+
+Build `smith.yml`:
+
+```bash
+docker run -it -w /smith \
+--privileged=true \
+-v $(pwd):/smith smith
+```
+
+You can also use an alias to run smith commands from your host:
+```bash
+smith(){
+  docker run -it -w /smith \
+    --privileged=true \
+    -v $(pwd):/smith \
+    smith $@
+}
+```
 
 Your image will be saved as image.tar.gz. You can change the name with a
 parameter:
