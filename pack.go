@@ -139,6 +139,7 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	config := v1.Image{}
 	config.Architecture = "amd64"
 	config.OS = "linux"
+	config.Config.Entrypoint = def.Entrypoint
 	config.Config.Cmd = def.Cmd
 	config.Config.Env = def.Env
 	config.Config.WorkingDir = def.Dir

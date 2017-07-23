@@ -18,20 +18,21 @@ type MockDef struct {
 }
 
 type ConfigDef struct {
-	Type     string              `json:"type,omitempty"` //defaults to "mock"
-	Mock     MockDef             `json:"mock,omitempty"`
-	Package  string              `json:"package,omitempty"`
-	Paths    []string            `json:"paths,omitempty"`
-	Excludes []string            `json:"excludes,omitempty"`
-	Parent   string              `json:"parent,omitempty"`
-	Nss      bool                `json:"nss,omitempty"`
-	Root     bool                `json:"root,omitempty"`
-	User     string              `json:"user,omitempty"`
-	Mounts   []string            `json:"mounts,omitempty"`
-	Cmd      []string            `json:"cmd,omitempty"`
-	Dir      string              `json:"dir,omitempty"`
-	Env      []string            `json:"env,omitempty"`
-	Ports    map[string]struct{} `json:"ports,omitempty"`
+	Type       string              `json:"type,omitempty"` //defaults to "mock"
+	Mock       MockDef             `json:"mock,omitempty"`
+	Package    string              `json:"package,omitempty"`
+	Paths      []string            `json:"paths,omitempty"`
+	Excludes   []string            `json:"excludes,omitempty"`
+	Parent     string              `json:"parent,omitempty"`
+	Nss        bool                `json:"nss,omitempty"`
+	Root       bool                `json:"root,omitempty"`
+	User       string              `json:"user,omitempty"`
+	Mounts     []string            `json:"mounts,omitempty"`
+	Entrypoint []string            `json:"entrypoint,omitempty"`
+	Cmd        []string            `json:"cmd,omitempty"`
+	Dir        string              `json:"dir,omitempty"`
+	Env        []string            `json:"env,omitempty"`
+	Ports      map[string]struct{} `json:"ports,omitempty"`
 }
 
 func ReadConfig(path string) (*ConfigDef, error) {
