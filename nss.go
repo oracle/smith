@@ -28,7 +28,8 @@ func Users(outputDir string, users []string) error {
 	if err := os.MkdirAll(etcDir, 0755); err != nil {
 		return err
 	}
-	if err := groups(outputDir); err != nil {
+	// add a group for each user
+	if err := groups(outputDir, users); err != nil {
 		return err
 	}
 	s := []string{
@@ -37,7 +38,7 @@ func Users(outputDir string, users []string) error {
 		"daemon:x:2:0:daemon:/bin:",
 	}
 	for i, user := range users {
-		s = append(s, fmt.Sprintf("%s:x:%d:0:%s:/write:", user, IDStart+i, user))
+		s = append(s, fmt.Sprintf("%s:x:%d:%d:%s:/write:", user, IDStart+i, IDStart+i, user))
 	}
 	path := filepath.Join(etcDir, "passwd")
 	if err := ioutil.WriteFile(path, []byte(strings.Join(s, "\n")), 0644); err != nil {
@@ -46,8 +47,18 @@ func Users(outputDir string, users []string) error {
 	return nss(outputDir)
 }
 
-func groups(outputDir string) error {
-	s := []string{"all:x:0:"}
+func groups(outputDir string, groups []string) error {
+	s := []string{
+		"root:x:0:",
+		"daemon:x:1:",
+		"bin:x:2:",
+		"sys:x:3:",
+		"adm:x:4:",
+		"tty:x:5:",
+	}
+	for i, group := range groups {
+		s = append(s, fmt.Sprintf("%s:x:%d:", group, IDStart+i))
+	}
 	path := filepath.Join(outputDir, "etc", "group")
 	if err := ioutil.WriteFile(path, []byte(strings.Join(s, "\n")), 0644); err != nil {
 		return err

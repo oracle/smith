@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -54,6 +53,7 @@ func tarWriteFunc(baseDir string, tarOut *tar.Writer) filepath.WalkFunc {
 		header := new(tar.Header)
 		header.Name = rpath
 		header.Uid = IDStart
+		header.Gid = IDStart
 		header.Mode = int64(info.Mode().Perm())
 		header.ModTime = time.Time{}
 		if info.IsDir() {
@@ -145,9 +145,9 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	config.Config.WorkingDir = def.Dir
 	config.Config.ExposedPorts = def.Ports
 	if def.Root {
-		config.Config.User = "0"
+		config.Config.User = "0:0"
 	} else {
-		config.Config.User = strconv.Itoa(IDStart)
+		config.Config.User = fmt.Sprintf("%d:%d", IDStart, IDStart)
 	}
 	for _, vol := range def.Mounts {
 		config.Config.Volumes[vol] = struct{}{}
