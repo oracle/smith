@@ -51,6 +51,28 @@ test: fmt $(call testdirs,$(DIRS))
 
 clean:
 	rm -f $(NAME)
+	rm -rf rpm
 
 install: all
 	install -D smith $(DESTDIR)/usr/bin/smith
+
+rpm:
+	mkdir -p rpm
+
+rpm/SPECS/smith.spec: rpm
+	mkdir -p rpm/SPECS
+	sed s/@VERSION@/$(VERSION)/g smith.spec > rpm/SPECS/smith.spec
+
+rpm/SOURCES/smith-$(VERSION).tar.gz: rpm
+	mkdir -p rpm/SOURCES
+	git archive -o rpm/SOURCES/smith-$(VERSION).tar.gz --prefix "smith-$(VERSION)/" HEAD
+
+rpm/smith-$(VERSION)-3.src.rpm: rpm/SPECS/smith.spec rpm/SOURCES/smith-$(VERSION).tar.gz
+	/usr/bin/mock --buildsrpm --spec rpm/SPECS/smith.spec --sources rpm/SOURCES --resultdir rpm
+
+rpm/smith-$(VERSION)-3.x86_64.rpm: rpm/smith-$(VERSION)-3.src.rpm
+	/usr/bin/mock --rebuild rpm/smith-$(VERSION)-3.src.rpm --resultdir rpm
+
+.PHONY: rpms
+rpms: rpm/smith-$(VERSION)-3.x86_64.rpm
+
