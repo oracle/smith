@@ -147,29 +147,28 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	}
 	logrus.Infof("Building in %v", buildDir)
 
-	// build package
-	logrus.Infof("Installing package")
 	outputDir, err := rootfsDir(buildDir, rootfs)
 	if err != nil {
 		logrus.Infof("Failed to get rootfs dir: %v", err)
 		return false
 	}
 
+	nss, err := PopulateNss(outputDir, pkg.User, pkg.Groups)
+	if err != nil {
+		logrus.Infof("Failed to populate nss: %v", err)
+		return false
+	}
+	// force nss on if named users or groups were specified
+	if nss {
+		pkg.Nss = true
+	}
+
+	// build package
+	logrus.Infof("Installing package")
 	packages, err := installPackage(buildOpts, outputDir, pkg)
 	if err != nil {
 		logrus.Infof("Failed to install %v: %v", pkg.Package, err)
 		return false
-	}
-
-	if pkg.Nss {
-		if pkg.User == "" {
-			pkg.User = "smith"
-		}
-		logrus.Infof("Adding user %s", pkg.User)
-		if err := Users(outputDir, []string{pkg.User}); err != nil {
-			logrus.Infof("Failed to create users: %v", err)
-			return false
-		}
 	}
 
 	for _, mnt := range pkg.Mounts {

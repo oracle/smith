@@ -27,6 +27,7 @@ type ConfigDef struct {
 	Nss        bool                `json:"nss,omitempty"`
 	Root       bool                `json:"root,omitempty"`
 	User       string              `json:"user,omitempty"`
+	Groups     []string            `json:"groups,omitempty"`
 	Mounts     []string            `json:"mounts,omitempty"`
 	Entrypoint []string            `json:"entrypoint,omitempty"`
 	Cmd        []string            `json:"cmd,omitempty"`
