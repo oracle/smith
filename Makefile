@@ -59,7 +59,7 @@ install: all
 rpm:
 	mkdir -p rpm
 
-rpm/SPECS/smith.spec: rpm
+rpm/SPECS/smith.spec: rpm all
 	mkdir -p rpm/SPECS
 	sed s/@VERSION@/$(VERSION)/g smith.spec > rpm/SPECS/smith.spec
 

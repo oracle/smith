@@ -34,7 +34,7 @@ const (
 	manifestVersion  = 2
 )
 
-func tarWriteFunc(baseDir string, tarOut *tar.Writer) filepath.WalkFunc {
+func tarWriteFunc(baseDir string, tarOut *tar.Writer, uid int, gid int) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -52,8 +52,8 @@ func tarWriteFunc(baseDir string, tarOut *tar.Writer) filepath.WalkFunc {
 		}
 		header := new(tar.Header)
 		header.Name = rpath
-		header.Uid = IDStart
-		header.Gid = IDStart
+		header.Uid = uid
+		header.Gid = gid
 		header.Mode = int64(info.Mode().Perm())
 		header.ModTime = time.Time{}
 		if info.IsDir() {
@@ -146,8 +146,10 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	config.Config.ExposedPorts = def.Ports
 	if def.Root {
 		config.Config.User = "0:0"
+	} else if def.User != "" {
+		config.Config.User = def.User
 	} else {
-		config.Config.User = fmt.Sprintf("%d:%d", IDStart, IDStart)
+		config.Config.User = fmt.Sprintf("%d:%d", DefaultID, DefaultID)
 	}
 	for _, vol := range def.Mounts {
 		config.Config.Volumes[vol] = struct{}{}
@@ -222,7 +224,7 @@ func imageIndex(entries []v1.Descriptor, annotations map[string]string) v1.Index
 	return rv
 }
 
-func layerFromPath(path string) (*Layer, error) {
+func layerFromPath(path string, uid int, gid int) (*Layer, error) {
 	b := bytes.Buffer{}
 	gzipHash := sha256.New()
 	tarHash := sha256.New()
@@ -231,7 +233,7 @@ func layerFromPath(path string) (*Layer, error) {
 		return nil, err
 	}
 	tarOut := tar.NewWriter(io.MultiWriter(gzipOut, tarHash))
-	writeTarFile := tarWriteFunc(path, tarOut)
+	writeTarFile := tarWriteFunc(path, tarOut, uid, gid)
 	if err := filepath.Walk(path, writeTarFile); err != nil {
 		logrus.Errorf("Failed to walk directory %v: %v", path, err)
 		tarOut.Close()
@@ -414,7 +416,8 @@ func imageFromBuild(def *ConfigDef, baseDir string) (*Image, error) {
 		}
 	}
 	image.Config = configFromDef(def)
-	layer, err := layerFromPath(filepath.Join(baseDir, rootfs))
+	uid, gid, _, _, _ := ParseUser(def.User)
+	layer, err := layerFromPath(filepath.Join(baseDir, rootfs), uid, gid)
 	if err != nil {
 		return nil, err
 	}
