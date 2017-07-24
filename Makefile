@@ -29,13 +29,13 @@ id = $(shell head -c20 /dev/urandom|od -An -tx1|tr -d ' \n')
 # if it is cloned outside of the gopath. Go's vendor support only works if
 # the project is inside the gopath
 $(NAME): $(call gofiles,$(DIRS))
+	rm -rf build
 	mkdir -p build/src/$(REMOTE)
 	rm -f build/src/$(REMOTE)/$(NAME) && ln -s ../../../../ build/src/$(REMOTE)/$(NAME)
 	cd build/src/$(REMOTE)/$(NAME) && CGO_ENABLED=0 GOPATH=$(CURDIR)/build \
 		GO15VENDOREXPERIMENT=1 go build -a -x -v \
 		-ldflags '-X "main.ver=$(VERSION)" -X "main.sha=$(sha)" -B 0x$(id)' \
-		-o $(NAME) . || ( rm -rf build && false )
-	rm -rf build
+		-o $(NAME) .
 
 .PHONY: $(call testdirs,$(DIRS))
 $(call testdirs,$(DIRS)):
@@ -51,6 +51,7 @@ test: fmt $(call testdirs,$(DIRS))
 
 clean:
 	rm -f $(NAME)
+	rm -rf build
 	rm -rf rpm
 
 install: all
