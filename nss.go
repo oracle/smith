@@ -80,13 +80,13 @@ func ParseUser(user string) (int, int, string, string, bool) {
 	if val, err := strconv.Atoi(u); err == nil {
 		uid = val
 		u = getName(users, uid)
-	} else {
+	} else if u != "" {
 		nss = true
 	}
 	if val, err := strconv.Atoi(g); err == nil {
 		gid = val
 		g = getName(groups, gid)
-	} else {
+	} else if g != "" {
 		nss = true
 	}
 	if uid == -1 {

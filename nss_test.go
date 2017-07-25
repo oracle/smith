@@ -23,6 +23,7 @@ func TestParseUser(t *testing.T) {
 		{"foo:bar", 10, 10, "foo", "bar", true},
 		{"foo:1000", 10, 1000, "foo", "smith", true},
 		{"1000:bar", 1000, 10, "smith", "bar", true},
+		{"", 10, 10, "smith", "smith", false},
 	} {
 		uid, gid, u, g, nss := ParseUser(c.User)
 		if uid != c.Uid {
