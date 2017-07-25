@@ -412,6 +412,9 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 
 	// only unpack if the directory doesn't already exist
 	if _, err := os.Stat(unpackDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(unpackDir, 0755); err != nil {
+			return err
+		}
 		if err := ExtractOci(image, unpackDir); err != nil {
 			return err
 		}
