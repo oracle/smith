@@ -342,22 +342,8 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 		return err
 	}
 	// pull the existing data out of the image
+	setDefaultsFromImage(pkg, image)
 
-	if len(pkg.Entrypoint) == 0 {
-		pkg.Entrypoint = image.Config.Config.Entrypoint
-	}
-	if len(pkg.Cmd) == 0 {
-		pkg.Cmd = image.Config.Config.Cmd
-	}
-	if len(pkg.Env) == 0 {
-		pkg.Env = image.Config.Config.Env
-	}
-	if len(pkg.Dir) == 0 {
-		pkg.Dir = image.Config.Config.WorkingDir
-	}
-	if len(pkg.Ports) == 0 {
-		pkg.Ports = image.Config.Config.ExposedPorts
-	}
 	if !buildOpts.fast {
 		// remove directory
 		logrus.Debugf("Removing %v", unpackDir)

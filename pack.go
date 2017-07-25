@@ -405,6 +405,24 @@ func imageFromFile(path string) (*Image, error) {
 	return imageFromDigest(digestExtractor(tarpath), digest, annotations)
 }
 
+func setDefaultsFromImage(def *ConfigDef, image *Image) {
+	if def.Dir == "" {
+		def.Dir = image.Config.Config.WorkingDir
+	}
+	if len(def.Entrypoint) == 0 {
+		def.Entrypoint = image.Config.Config.Entrypoint
+	}
+	if len(def.Cmd) == 0 {
+		def.Cmd = image.Config.Config.Cmd
+	}
+	if len(def.Env) == 0 {
+		def.Env = image.Config.Config.Env
+	}
+	if len(def.Ports) == 0 {
+		def.Ports = image.Config.Config.ExposedPorts
+	}
+}
+
 func imageFromBuild(def *ConfigDef, baseDir string) (*Image, error) {
 	// get parent layers
 	image := &Image{}
@@ -414,6 +432,7 @@ func imageFromBuild(def *ConfigDef, baseDir string) (*Image, error) {
 		if err != nil {
 			return nil, err
 		}
+		setDefaultsFromImage(def, image)
 	}
 	image.Config = configFromDef(def)
 	uid, gid, _, _, _ := ParseUser(def.User)
