@@ -215,9 +215,6 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	// perform overlay
 	logrus.Infof("Performing overlay")
 	files := []string{rootfs}
-	if pkg.Parent != "" {
-		files = append(files, strings.Split(pkg.Parent, ":")[0])
-	}
 	err = CopyTree(path, buildDir, files, nil, pkg.Nss, false, false)
 	if err != nil {
 		logrus.Infof("Failed to copy %v to %v: %v", path, buildDir, err)
@@ -386,7 +383,7 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 			return "", "", err
 		}
 
-		// Rind the executable using path in chroot. Note that this will accept a
+		// Find the executable using path in chroot. Note that this will accept a
 		// symlink even if it is dangling
 
 		if !strings.Contains(name, "/") {
