@@ -23,7 +23,7 @@ func SetSoPathsFromExecutor(ex executor) error {
 	stdout, stderr, err := ex("ldconfig", "-v", "-N", "-X", "/")
 	if err != nil {
 		logrus.Warnf("ldconfig failed: %v", strings.TrimSpace(stderr))
-		return err
+		return nil
 	}
 	SetSoPaths(stdout)
 	return nil
