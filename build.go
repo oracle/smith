@@ -214,6 +214,9 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	// perform overlay
 	logrus.Infof("Performing overlay")
 	files := []string{rootfs}
+	if pkg.Parent != "" {
+		files = append(files, strings.Split(pkg.Parent, ":")[0])
+	}
 	err = CopyTree(path, buildDir, files, nil, pkg.Nss, false, false)
 	if err != nil {
 		logrus.Errorf("Failed to copy %v to %v: %v", path, buildDir, err)
