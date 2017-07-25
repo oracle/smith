@@ -96,13 +96,13 @@ func getMetadata() *ImageMetadata {
 func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	outpath, err := filepath.Abs(tarfile)
 	if err != nil {
-		logrus.Infof("Failed to get abs path of %v: %v", tarfile, err)
+		logrus.Errorf("Failed to get abs path of %v: %v", tarfile, err)
 		return false
 	}
 
 	current, err := os.Getwd()
 	if err != nil {
-		logrus.Infof("Failed to get working directory: %v", err)
+		logrus.Errorf("Failed to get working directory: %v", err)
 		return false
 	}
 
@@ -110,12 +110,12 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	if buildOpts.dir != "" {
 		path, err = filepath.Abs(buildOpts.dir)
 		if err != nil {
-			logrus.Infof("Failed to get abs path of %v: %v", buildOpts.dir, err)
+			logrus.Errorf("Failed to get abs path of %v: %v", buildOpts.dir, err)
 			return false
 		}
 		err = os.Chdir(path)
 		if err != nil {
-			logrus.Infof("Failed to change directory to %v: %v", path, err)
+			logrus.Errorf("Failed to change directory to %v: %v", path, err)
 			return false
 		}
 		defer os.Chdir(current)
@@ -123,39 +123,39 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 
 	pkg, err := ReadConfig(buildOpts.conf)
 	if err != nil {
-		logrus.Infof("Failed to read config: %v", err)
+		logrus.Errorf("Failed to read config: %v", err)
 		return false
 	}
 
 	buildDir, err := ioutil.TempDir("", "smith-build-")
 	if err != nil {
-		logrus.Infof("Unable to get temp dir: %v", err)
+		logrus.Errorf("Unable to get temp dir: %v", err)
 		return false
 	}
 	defer func() {
 		// remove directory
-		logrus.Infof("Removing %v", buildDir)
+		logrus.Debugf("Removing %v", buildDir)
 		err = os.RemoveAll(buildDir)
 		if err != nil {
-			logrus.Infof("Failed to remove %v: %v", buildDir, err)
+			logrus.Warnf("Failed to remove %v: %v", buildDir, err)
 		}
 	}()
 
 	if err := os.Chmod(buildDir, 0777); err != nil {
-		logrus.Infof("Failed to make %v writeable: %v", buildDir, err)
+		logrus.Errorf("Failed to make %v writeable: %v", buildDir, err)
 		return false
 	}
 	logrus.Infof("Building in %v", buildDir)
 
 	outputDir, err := rootfsDir(buildDir, rootfs)
 	if err != nil {
-		logrus.Infof("Failed to get rootfs dir: %v", err)
+		logrus.Errorf("Failed to get rootfs dir: %v", err)
 		return false
 	}
 
 	nss, err := PopulateNss(outputDir, pkg.User, pkg.Groups)
 	if err != nil {
-		logrus.Infof("Failed to populate nss: %v", err)
+		logrus.Errorf("Failed to populate nss: %v", err)
 		return false
 	}
 	// force nss on if named users or groups were specified
@@ -164,17 +164,19 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	}
 
 	// build package
-	logrus.Infof("Installing package")
-	packages, err := installPackage(buildOpts, outputDir, pkg)
-	if err != nil {
-		logrus.Infof("Failed to install %v: %v", pkg.Package, err)
-		return false
+	var packages []string
+	if pkg.Package != "" {
+		packages, err = installPackage(buildOpts, outputDir, pkg)
+		if err != nil {
+			logrus.Errorf("Failed to install %v: %v", pkg.Package, err)
+			return false
+		}
 	}
 
 	for _, mnt := range pkg.Mounts {
 		err = os.MkdirAll(filepath.Join(outputDir, mnt), 0755)
 		if err != nil {
-			logrus.Infof("Failed to create %v dir: %v", mnt, err)
+			logrus.Errorf("Failed to create %v dir: %v", mnt, err)
 			return false
 		}
 	}
@@ -184,7 +186,7 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	metaDir := filepath.Join(buildDir, ".meta")
 	err = os.MkdirAll(metaDir, 0755)
 	if err != nil {
-		logrus.Infof("Failed to create .meta dir: %v", err)
+		logrus.Errorf("Failed to create .meta dir: %v", err)
 		return false
 	}
 
@@ -212,19 +214,16 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	// perform overlay
 	logrus.Infof("Performing overlay")
 	files := []string{rootfs}
-	if pkg.Parent != "" {
-		files = append(files, strings.Split(pkg.Parent, ":")[0])
-	}
 	err = CopyTree(path, buildDir, files, nil, pkg.Nss, false, false)
 	if err != nil {
-		logrus.Infof("Failed to copy %v to %v: %v", path, buildDir, err)
+		logrus.Errorf("Failed to copy %v to %v: %v", path, buildDir, err)
 		return false
 	}
 
 	// pack
 	logrus.Infof("Packing image into %v", outpath)
 	if err := WriteOciFromBuild(pkg, buildDir, outpath, metadata, extraBlobs); err != nil {
-		logrus.Infof("Failed to pack dir into %v: %v", outpath, err)
+		logrus.Errorf("Failed to pack dir into %v: %v", outpath, err)
 		return false
 	}
 	return true
@@ -361,9 +360,10 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 	}
 	if !buildOpts.fast {
 		// remove directory
-		logrus.Infof("Removing %v", unpackDir)
+		logrus.Debugf("Removing %v", unpackDir)
 		if err := os.RemoveAll(unpackDir); err != nil {
-			logrus.Infof("Failed to remove %v: %v", unpackDir, err)
+			logrus.Errorf("Failed to remove %v: %v", unpackDir, err)
+			return err
 		}
 	}
 
@@ -383,7 +383,7 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 			return "", "", err
 		}
 
-		// Rind the executable using path in chroot. Note that this will accept a
+		// Find the executable using path in chroot. Note that this will accept a
 		// symlink even if it is dangling
 
 		if !strings.Contains(name, "/") {
@@ -409,6 +409,9 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 
 	// only unpack if the directory doesn't already exist
 	if _, err := os.Stat(unpackDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(unpackDir, 0755); err != nil {
+			return err
+		}
 		if err := ExtractOci(image, unpackDir); err != nil {
 			return err
 		}

@@ -77,3 +77,7 @@ rpm/smith-$(VERSION)-3.x86_64.rpm: rpm/smith-$(VERSION)-3.src.rpm
 .PHONY: rpms
 rpms: rpm/smith-$(VERSION)-3.x86_64.rpm
 
+.PHONY: version
+version:
+	@echo $(VERSION)
+
