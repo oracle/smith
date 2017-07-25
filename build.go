@@ -164,11 +164,14 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 	}
 
 	// build package
-	logrus.Infof("Installing package")
-	packages, err := installPackage(buildOpts, outputDir, pkg)
-	if err != nil {
-		logrus.Infof("Failed to install %v: %v", pkg.Package, err)
-		return false
+	var packages []string
+	if pkg.Package != "" {
+		logrus.Infof("Installing package")
+		packages, err = installPackage(buildOpts, outputDir, pkg)
+		if err != nil {
+			logrus.Infof("Failed to install %v: %v", pkg.Package, err)
+			return false
+		}
 	}
 
 	for _, mnt := range pkg.Mounts {
