@@ -48,7 +48,8 @@ func CopyTree(baseDir, outputDir string, globs []string, excludes []string, nss,
 	}
 
 	if len(globs) == 0 {
-		globs = []string{"*"}
+		logrus.Debugf("Skipping copy because globs is empty")
+		return nil
 	}
 
 	for _, glob := range globs {
