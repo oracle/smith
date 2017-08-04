@@ -132,18 +132,21 @@ echo "Hello World!" >rootfs/read/data
 Build `smith.yml`:
 
 ```bash
-docker run -it -w /smith \
---privileged=true \
--v $(pwd):/smith smith
+docker run -it --rm \
+--privileged -v $PWD:/write \
+-v cache:/var/cache \
+-v mock:/var/lib/mock vishvananda/smith
 ```
 
+
 You can also use an alias to run smith commands from your host:
+
 ```bash
 smith(){
-  docker run -it -w /smith \
-    --privileged=true \
-    -v $(pwd):/smith \
-    smith $@
+    docker run -it --rm \
+    --privileged -v $PWD:/write \
+    -v cache:/var/cache \
+    -v mock:/var/lib/mock vishvananda/smith $@
 }
 ```
 
@@ -171,6 +174,17 @@ your smith.yaml as package, for example:
     cmd:
     - /usr/bin/cat
     - /read/data
+
+
+To build Smith directly from oci, the Docker command is slightly different:
+
+```bash
+smith(){
+    docker run -it --rm \
+    -v $PWD:/write \
+    -v tmp:/tmp vishvananda/smith $@
+}
+```
 
 ## Advanced Usage ##
 
