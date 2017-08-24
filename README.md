@@ -25,6 +25,8 @@ from rpm packages or oci images.
 
 ## Building `smith` ##
 
+[![wercker status](https://app.wercker.com/status/3795ec11f790da9b58d5acbdd1dafc9d/s/master "wercker status")](https://app.wercker.com/project/byKey/3795ec11f790da9b58d5acbdd1dafc9d)
+
 Building can be done via the Makefile:
 
     make
