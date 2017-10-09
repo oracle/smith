@@ -27,6 +27,8 @@ const (
 	dockerLayerMT    = "application/vnd.docker.image.rootfs.diff.tar.gzip"
 	dockerConfigMT   = "application/vnd.docker.container.image.v1+json"
 	dockerManifestMT = "application/vnd.docker.distribution.manifest.v2+json"
+	ociCreated       = "org.opencontainers.image.created"
+	ociRefName       = "org.opencontainers.image.ref.name"
 	layerMT          = v1.MediaTypeImageLayerGzip
 	configMT         = v1.MediaTypeImageConfig
 	manifestMT       = v1.MediaTypeImageManifest
@@ -322,9 +324,9 @@ func imageFromDigest(extract Extractor, digest gdigest.Digest, annotations map[s
 	// is deterministic, but other tools use the created value. Set Created from
 	// the annotations when unpacking to make registries happy upon upload.
 	if config.Created == nil {
-		strval := manifest.Annotations["org.opencontainers.created"]
+		strval := manifest.Annotations[ociCreated]
 		if strval == "" {
-			strval = annotations["org.opencontainers.created"]
+			strval = annotations[ociCreated]
 		}
 		if created, err := time.Parse(time.RFC3339, strval); err == nil {
 			config.Created = &created
@@ -393,7 +395,7 @@ func imageFromFile(path string) (*Image, error) {
 	digest := gdigest.Digest("")
 	annotations := map[string]string{}
 	for _, defn := range ref.Manifests {
-		if defn.Annotations["org.opencontainers.ref.name"] == tag {
+		if defn.Annotations[ociRefName] == tag {
 			digest = defn.Digest
 			annotations = defn.Annotations
 		}
@@ -554,9 +556,9 @@ func WriteOciTar(image *Image, out io.Writer) error {
 	latest := desc(manifestMT, manifestData, manifestSha)
 	if image.Metadata != nil {
 		latest.Annotations = map[string]string{}
-		latest.Annotations["org.opencontainers.ref.name"] = "latest"
+		latest.Annotations[ociRefName] = "latest"
 		created := image.Metadata.BuildTime.Format(time.RFC3339)
-		latest.Annotations["org.opencontainers.created"] = created
+		latest.Annotations[ociCreated] = created
 		latest.Annotations["com.oracle.smith.version"] = image.Metadata.SmithVer
 		latest.Annotations["com.oracle.smith.sha"] = image.Metadata.SmithSha
 		if image.Metadata.Buildno != "" {
