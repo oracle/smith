@@ -54,7 +54,9 @@ func SetSoPaths(ldconfigout string) {
 			// we use the source name for the mapping because we want to
 			// keep the symlink around for the loader
 			source := strings.TrimSpace(parts[0])
-			soMap[source] = filepath.Join(path, source)
+			if _, ok := soMap[source]; !ok {
+				soMap[source] = filepath.Join(path, source)
+			}
 		}
 	}
 }
