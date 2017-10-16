@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	soMap map[string]string
+	soMap        map[string]string
+	preloadPaths []string
 )
 
 type executor func(name string, arg ...string) (string, string, error)
@@ -19,21 +20,22 @@ type executor func(name string, arg ...string) (string, string, error)
 // the executor should be a function which takes string args and returns
 // stdout, stderr, error. The executor is responsible for setting up the
 // proper environment for ldconfig, by chrooting for example.
-func SetSoPathsFromExecutor(ex executor) error {
+func SetSoPathsFromExecutor(ex executor, preload []string) error {
 	stdout, stderr, err := ex("ldconfig", "-v", "-N", "-X", "/")
 	if err != nil {
 		logrus.Warnf("ldconfig failed: %v", strings.TrimSpace(stderr))
 		return nil
 	}
-	SetSoPaths(stdout)
+	SetSoPaths(stdout, preload)
 	return nil
 }
 
 // SetSoPaths parses a string formatted like the output from
 // ldconfig -v -N -X and stores the so paths for later use by Deps
-func SetSoPaths(ldconfigout string) {
+func SetSoPaths(ldconfigout string, preload []string) {
 	lines := strings.Split(ldconfigout, "\n")
 	soMap = map[string]string{}
+	preloadPaths = preload
 	path := ""
 	for _, line := range lines {
 		if len(line) == 0 {
@@ -105,7 +107,7 @@ func Deps(chrootDir, path string, nss bool) (map[string]struct{}, error) {
 	if err != nil || needs == nil {
 		return result, nil
 	}
-	paths := []string{}
+	paths := preloadPaths
 	runpaths, err := elfFile.DynString(elf.DT_RUNPATH)
 	shortPath := strings.TrimPrefix(path, chrootDir)
 	origin := filepath.Dir(shortPath)

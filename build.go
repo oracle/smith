@@ -305,7 +305,7 @@ func buildMock(buildOpts *buildOptions, outputDir string, pkg *ConfigDef, pkgMfs
 		return MockExecuteQuiet(pkg.Mock.Config, name, arg...)
 	}
 
-	if err := SetSoPathsFromExecutor(executor); err != nil {
+	if err := SetSoPathsFromExecutor(executor, nil); err != nil {
 		return err
 	}
 
@@ -358,9 +358,13 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 
 	// set path for executor
 	path := "/usr/sbin:/usr/bin:/sbin:/bin"
+	ld_library_path := ""
 	for _, e := range pkg.Env {
 		if strings.HasPrefix(e, "PATH=") {
 			path = e[len("PATH="):]
+		}
+		if strings.HasPrefix(e, "LD_LIBRARY_PATH=") {
+			ld_library_path = e[len("LD_LIBRARY_PATH="):]
 		}
 	}
 	executor := func(name string, arg ...string) (string, string, error) {
@@ -409,7 +413,8 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 		}
 	}
 
-	if err := SetSoPathsFromExecutor(executor); err != nil {
+	preload := strings.Split(ld_library_path, ":")
+	if err := SetSoPathsFromExecutor(executor, preload); err != nil {
 		return err
 	}
 
