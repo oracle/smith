@@ -35,7 +35,7 @@ func TestDeps(t *testing.T) {
 		expected[dep] = struct{}{}
 	}
 
-	err := SetSoPathsFromExecutor(execute.ExecuteQuiet)
+	err := SetSoPathsFromExecutor(execute.ExecuteQuiet, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -55,7 +55,7 @@ func TestDepsNss(t *testing.T) {
 		expected[dep] = struct{}{}
 	}
 
-	err := SetSoPathsFromExecutor(execute.ExecuteQuiet)
+	err := SetSoPathsFromExecutor(execute.ExecuteQuiet, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -76,7 +76,7 @@ func TestFindLibrary(t *testing.T) {
 	exec := func(name string, arg ...string) (string, string, error) {
 		return fakeLdconfig, "", nil
 	}
-	err := SetSoPathsFromExecutor(exec)
+	err := SetSoPathsFromExecutor(exec, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -92,7 +92,7 @@ func TestFindLibrarySearch(t *testing.T) {
 	exec := func(name string, arg ...string) (string, string, error) {
 		return "", "", nil
 	}
-	err := SetSoPathsFromExecutor(exec)
+	err := SetSoPathsFromExecutor(exec, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
