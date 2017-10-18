@@ -33,6 +33,7 @@ type ConfigDef struct {
 	Cmd        []string            `json:"cmd,omitempty"`
 	Dir        string              `json:"dir,omitempty"`
 	Env        []string            `json:"env,omitempty"`
+	Labels     map[string]string   `json:"labels,omitempty"`
 	Ports      map[string]struct{} `json:"ports,omitempty"`
 }
 

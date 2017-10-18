@@ -146,6 +146,7 @@ func configFromDef(def *ConfigDef) *v1.Image {
 	config.Config.Env = def.Env
 	config.Config.WorkingDir = def.Dir
 	config.Config.ExposedPorts = def.Ports
+	config.Config.Labels = def.Labels
 	if def.Root {
 		config.Config.User = "0:0"
 	} else if def.User != "" {
@@ -422,6 +423,9 @@ func setDefaultsFromImage(def *ConfigDef, image *Image) {
 	}
 	if len(def.Ports) == 0 {
 		def.Ports = image.Config.Config.ExposedPorts
+	}
+	if len(def.Labels) == 0 {
+		def.Labels = image.Config.Config.Labels
 	}
 }
 
