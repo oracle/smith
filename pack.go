@@ -325,9 +325,9 @@ func imageFromDigest(extract Extractor, digest gdigest.Digest, annotations map[s
 	// is deterministic, but other tools use the created value. Set Created from
 	// the annotations when unpacking to make registries happy upon upload.
 	if config.Created == nil {
-		strval := manifest.Annotations[ociCreated]
+		strval := manifest.Annotations[v1.AnnotationCreated]
 		if strval == "" {
-			strval = annotations[ociCreated]
+			strval = annotations[v1.AnnotationRefName]
 		}
 		if created, err := time.Parse(time.RFC3339, strval); err == nil {
 			config.Created = &created

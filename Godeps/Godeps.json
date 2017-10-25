@@ -29,13 +29,13 @@
 		},
 		{
 			"ImportPath": "github.com/opencontainers/image-spec/specs-go",
-			"Comment": "v1.0.0-rc6",
-			"Rev": "1a6593ab6c3ab5902072b4694a22ff19425396ae"
+			"Comment": "v1.0.0",
+			"Rev": "ab7389ef9f50030c9b245bc16b981c7ddf192882"
 		},
 		{
 			"ImportPath": "github.com/opencontainers/image-spec/specs-go/v1",
-			"Comment": "v1.0.0-rc6",
-			"Rev": "1a6593ab6c3ab5902072b4694a22ff19425396ae"
+			"Comment": "v1.0.0",
+			"Rev": "ab7389ef9f50030c9b245bc16b981c7ddf192882"
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
