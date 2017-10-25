@@ -27,8 +27,6 @@ const (
 	dockerLayerMT    = "application/vnd.docker.image.rootfs.diff.tar.gzip"
 	dockerConfigMT   = "application/vnd.docker.container.image.v1+json"
 	dockerManifestMT = "application/vnd.docker.distribution.manifest.v2+json"
-	ociCreated       = "org.opencontainers.image.created"
-	ociRefName       = "org.opencontainers.image.ref.name"
 	layerMT          = v1.MediaTypeImageLayerGzip
 	configMT         = v1.MediaTypeImageConfig
 	manifestMT       = v1.MediaTypeImageManifest
