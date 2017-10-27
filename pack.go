@@ -394,7 +394,7 @@ func imageFromFile(path string) (*Image, error) {
 	digest := gdigest.Digest("")
 	annotations := map[string]string{}
 	for _, defn := range ref.Manifests {
-		if defn.Annotations[ociRefName] == tag {
+		if defn.Annotations[v1.AnnotationRefName] == tag {
 			digest = defn.Digest
 			annotations = defn.Annotations
 		}
@@ -558,9 +558,9 @@ func WriteOciTar(image *Image, out io.Writer) error {
 	latest := desc(manifestMT, manifestData, manifestSha)
 	if image.Metadata != nil {
 		latest.Annotations = map[string]string{}
-		latest.Annotations[ociRefName] = "latest"
+		latest.Annotations[v1.AnnotationRefName] = "latest"
 		created := image.Metadata.BuildTime.Format(time.RFC3339)
-		latest.Annotations[ociCreated] = created
+		latest.Annotations[v1.AnnotationCreated] = created
 		latest.Annotations["com.oracle.smith.version"] = image.Metadata.SmithVer
 		latest.Annotations["com.oracle.smith.sha"] = image.Metadata.SmithSha
 		if image.Metadata.Buildno != "" {
