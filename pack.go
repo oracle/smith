@@ -27,8 +27,6 @@ const (
 	dockerLayerMT    = "application/vnd.docker.image.rootfs.diff.tar.gzip"
 	dockerConfigMT   = "application/vnd.docker.container.image.v1+json"
 	dockerManifestMT = "application/vnd.docker.distribution.manifest.v2+json"
-	ociCreated       = "org.opencontainers.image.created"
-	ociRefName       = "org.opencontainers.image.ref.name"
 	layerMT          = v1.MediaTypeImageLayerGzip
 	configMT         = v1.MediaTypeImageConfig
 	manifestMT       = v1.MediaTypeImageManifest
@@ -325,9 +323,9 @@ func imageFromDigest(extract Extractor, digest gdigest.Digest, annotations map[s
 	// is deterministic, but other tools use the created value. Set Created from
 	// the annotations when unpacking to make registries happy upon upload.
 	if config.Created == nil {
-		strval := manifest.Annotations[ociCreated]
+		strval := manifest.Annotations[v1.AnnotationCreated]
 		if strval == "" {
-			strval = annotations[ociCreated]
+			strval = annotations[v1.AnnotationRefName]
 		}
 		if created, err := time.Parse(time.RFC3339, strval); err == nil {
 			config.Created = &created
