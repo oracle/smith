@@ -337,7 +337,12 @@ func buildOci(buildOpts *buildOptions, outputDir string, pkg *ConfigDef) error {
 	var err error
 	if strings.HasPrefix(pkg.Package, "http://") ||
 		strings.HasPrefix(pkg.Package, "https://") {
-		image, err = imageFromRemote(pkg.Package, buildOpts.insecure)
+		info, err := parseRepoInfo(pkg.Package, false)
+		if err != nil {
+			return err
+		}
+
+		image, err = NewRegistryClient(buildOpts.insecure).ImageFromRepo(info)
 	} else {
 		image, err = imageFromFile(pkg.Package)
 	}
