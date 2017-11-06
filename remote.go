@@ -36,6 +36,10 @@ type RepoInfo struct {
 	Docker   bool
 }
 
+func (s RepoInfo) String() string {
+	return fmt.Sprintf("%s://%s/%s:%s", s.Scheme, s.Host, s.Reponame, s.Tag)
+}
+
 func parseRepoInfo(remote string, docker bool) (*RepoInfo, error) {
 	r := RepoInfo{}
 	data, err := url.Parse(remote)
@@ -90,7 +94,7 @@ func uploadContainer(inName, remote string, insecure bool, docker bool) bool {
 	r := NewRegistryClient(insecure)
 	info, err := parseRepoInfo(remote, docker)
 	if err != nil {
-		logrus.Errorf("Failed to parse repository info for %s: %v", remote, err)
+		logrus.Errorf("Failed to parse repository info for image: %v", err)
 		return false
 	}
 	image, err := imageFromFile(inName)
@@ -98,11 +102,12 @@ func uploadContainer(inName, remote string, insecure bool, docker bool) bool {
 		logrus.Errorf("Failed to get image from %s: %v", inName, err)
 		return false
 	}
+
 	if err := r.ImageToRepo(info, image); err != nil {
-		logrus.Errorf("Failed to upload image to %s: %v", remote, err)
+		logrus.Errorf("Failed to upload image to %s: %v", info, err)
 		return false
 	}
-	logrus.Infof("Successfully uploaded %s to %s", inName, remote)
+	logrus.Infof("Successfully uploaded %s to %s", inName, info)
 	return true
 }
 
@@ -145,9 +150,15 @@ func (r *RegistryClient) ImageToRepo(info *RepoInfo, image *Image) error {
 }
 
 func downloadContainer(outName, remote string, insecure bool) bool {
-	image, err := imageFromRemote(remote, insecure)
+	info, err := parseRepoInfo(remote, false)
 	if err != nil {
-		logrus.Errorf("Failed to get image from remote %s: %v", remote, err)
+		logrus.Errorf("Failed to parse repo info: %v", err)
+		return false
+	}
+
+	image, err := NewRegistryClient(insecure).ImageFromRepo(info)
+	if err != nil {
+		logrus.Errorf("Failed to get image from %s: %v", info, err)
 		return false
 	}
 
@@ -157,17 +168,8 @@ func downloadContainer(outName, remote string, insecure bool) bool {
 		logrus.Errorf("Failed to write image to %s: %v", outName, err)
 		return false
 	}
-	logrus.Infof("Successfully downloaded %s to %s", remote, outName)
+	logrus.Infof("Successfully downloaded %s to %s", info, outName)
 	return true
-}
-
-func imageFromRemote(remote string, insecure bool) (*Image, error) {
-	r := NewRegistryClient(insecure)
-	info, err := parseRepoInfo(remote, false)
-	if err != nil {
-		return nil, err
-	}
-	return r.ImageFromRepo(info)
 }
 
 // ImageFromRepo gets an image from a repository.

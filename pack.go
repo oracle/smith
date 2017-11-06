@@ -325,7 +325,7 @@ func imageFromDigest(extract Extractor, digest gdigest.Digest, annotations map[s
 	if config.Created == nil {
 		strval := manifest.Annotations[v1.AnnotationCreated]
 		if strval == "" {
-			strval = annotations[v1.AnnotationRefName]
+			strval = annotations[v1.AnnotationCreated]
 		}
 		if created, err := time.Parse(time.RFC3339, strval); err == nil {
 			config.Created = &created
