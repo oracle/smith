@@ -26,10 +26,9 @@ const (
 // parameters.  This function will overwrite any existing passwd, group or
 // nsswitch.conf files. It returns true if the user string specified a
 // non-numeric user or group.
-
-func PopulateNss(outputDir string, user string, groups []string) (bool, error) {
-	uid, gid, u, g, nss := ParseUser(user)
-	if !nss && len(groups) == 0 {
+func PopulateNss(outputDir string, user string, groups []string, nss bool) (bool, error) {
+	uid, gid, u, g, n := ParseUser(user)
+	if !nss && !n && len(groups) == 0 {
 		return false, nil
 	}
 	etcDir := filepath.Join(outputDir, "etc")
