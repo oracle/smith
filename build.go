@@ -153,7 +153,7 @@ func buildContainer(tarfile string, buildOpts *buildOptions) bool {
 		return false
 	}
 
-	nss, err := PopulateNss(outputDir, pkg.User, pkg.Groups)
+	nss, err := PopulateNss(outputDir, pkg.User, pkg.Groups, pkg.Nss)
 	if err != nil {
 		logrus.Errorf("Failed to populate nss: %v", err)
 		return false
