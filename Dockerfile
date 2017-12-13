@@ -10,7 +10,7 @@ RUN make install
 
 FROM oraclelinux:7-slim
 
-RUN rpm -i http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+RUN rpm -i http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
 
 RUN yum install -y pigz mock && yum clean all
 
