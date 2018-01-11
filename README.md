@@ -65,6 +65,18 @@ to the mock config file. Instructions for debian/ubuntu:
     # have to do this again.
     sudo sed -i '/\[main\]/a multilib_policy=best' /etc/mock/default.cfg
 
+Whichever distro you are using check that your user is a member of the group mock:
+
+    $ groups
+
+If your user is not a member of the group mock then add them:
+
+    $ usermod -aG mock <your_username>
+
+On Oracle Linux edit your /etc/mock/site-defaults.cfg and add:
+
+    config_opts['use_nspawn'] = False
+    
 ## Installing `smith` ##
 
 Installing can be done via the Makefile:
