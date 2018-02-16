@@ -23,7 +23,41 @@ from rpm packages or oci images.
    placed into a directory called `/read`. Ephemeral files such as pid files
    can be written to `/run`.
 
-## Building `smith` ##
+## Building and Running `smith` ##
+
+You can build and run `smith` either as:
+- A Docker image
+- A Binary
+
+Both methods are described below, but __the Docker route is recommended__ as the simplest and easiest option.
+
+### Docker based `smith` ###
+
+#### Dependencies ####
+- Docker
+
+#### Method #### 
+1.  Clone `smith`:
+
+`git clone https://github.com/oracle/smith.git`
+
+2.  Build `smith` Docker image using the Dockerfile provided, optionally adding your own docker-repo-id to the tag:
+
+`sudo docker build -t [<docker-repo-id>/]smith .`
+
+3.  Set up an alias (or script) to run `smith` from the command line:
+```
+smith(){
+    sudo docker run -it --rm \
+    --privileged -v $PWD:/write \
+    -v cache:/var/cache \
+    -v mock:/var/lib/mock [<docker-repo-id>/]smith $@
+}
+```
+You should now be able to start building microcontainers (see below).
+ 
+### Binary `smith` ###
+
 
 [![wercker status](https://app.wercker.com/status/3795ec11f790da9b58d5acbdd1dafc9d/s/master "wercker status")](https://app.wercker.com/project/byKey/3795ec11f790da9b58d5acbdd1dafc9d)
 
@@ -31,39 +65,51 @@ Building can be done via the Makefile:
 
     make
 
-Build dependencies:
+#### Dependencies ####
+##### Build #####
+- Docker
+- Go
 
-    golang-bin
+To install go run `sudo yum install golang-bin` or `sudo apt install golang-go` as appropriate
 
 Go dependencies are vendored in the vendor directory.
 
-## Runtime dependencies ##
+##### Runtime #####
 
-To build from rpms, smith requires:
+To build from RPMs, `smith` requires:
 
-    mock
+- mock
 
-Although mock is used for rpm packaging, it can be installed on debian/ubuntu
-if you are willing to be a little tricky. Specifically you need at least mock
-1.2.  Version 1.1.X will not work because the -r flag does not support abspath
-to the mock config file. Instructions for debian/ubuntu:
+mock can have issues with non - RPM distros.
 
-    sudo apt-get install createrepo yum
-    # At the time of this writing the below package is suitable and available
-    # for download. Your milage may vary and we suggest finding an official
-    # debian mock package that is 1.2 or 1.3.
-    wget http://ftp.debian.org/debian/pool/main/m/mock/mock_1.3.2-1_all.deb
-    sudo dpkg -i mock_1.3.2-1_all.deb
-    usermod -a -G mock <your_username>
-    # rpm on debian has a patch to macros that messes up mock so undo it. Note
-    # that updating your os will sometimes reset this file and you will have
-    # to run this command again.
-    sudo sed -i 's;%_dbpath\t.*;%_dbpath\t\t%{_var}/lib/rpm;g' /usr/lib/rpm/macros
-    # on debian/ubuntu for some reason yum tries to install packages for
-    # multiple archs, so it is necessary to update the yum.conf section in
-    # default.cfg to prevent that. If you switch your default.cfg you may
-    # have to do this again.
-    sudo sed -i '/\[main\]/a multilib_policy=best' /etc/mock/default.cfg
+**If you have problems installing or running `smith` natively on a non - RPM distro, best advice is to build it and run it in a Docker container (see above)**
+
+mock can be installed on Debian/Ubuntu with some extra care (see below).  Specifically you need at least mock
+1.2.  Version 1.1.X will not work because the -r flag does not support abspath to the mock config file.
+Be aware that your `smith` builds may still fail.
+
+Debian/Ubuntu specific instructions (_Here be Dragons_):
+
+```sudo apt install mock createrepo yum```
+
+```
+# Fedora rawhide chroot (which mock uses by default) does not play well with
+# Debian, so point /etc/mock/default.cfg to EPEL 7 (6 on Ubuntu):
+sudo ln -s /etc/mock/epel-7-x86_64.cfg /etc/mock/default.cfg 
+```
+```
+# rpm on Debian has a patch to macros that messes up mock so undo it. Note
+# that updating your os will sometimes reset this file and you will have
+# to run this command again.
+sudo sed -i 's;%_dbpath\t.*;%_dbpath\t\t%{_var}/lib/rpm;g' /usr/lib/rpm/macros
+```
+```
+# on debian/ubuntu for some reason yum tries to install packages for
+# multiple archs, so it is necessary to update the yum.conf section in
+# default.cfg to prevent that. If you switch your default.cfg you may
+# have to do this again.
+sudo sed -i '/\[main\]/a multilib_policy=best' /etc/mock/default.cfg
+```
 
 Whichever distro you are using check that your user is a member of the group mock:
 
@@ -77,18 +123,12 @@ On Oracle Linux edit your /etc/mock/site-defaults.cfg and add:
 
     config_opts['use_nspawn'] = False
     
-## Installing `smith` ##
+#### Installing `smith` ####
 
 Installing can be done via the Makefile:
 
     sudo make install
 
-
-## Installing `smith` using a Docker container ##
-
-```bash
-docker build -t smith .
-```
 
 ## Using `smith` ##
 
@@ -100,9 +140,9 @@ If you are building the same container multiple times without editing the
 package line, the `-f` parameter will rebuild the container without
 reinstalling the package.
 
-## Build ##
+## Building Microcontainers ##
 
-To build a container with smith, create a smith.yaml file and invoke smith with no
+To build a container with `smith`, create a smith.yaml file and invoke smith with no
 parameters:
 
     mkdir cat
@@ -121,48 +161,6 @@ parameters:
     echo "Hello World!" >rootfs/read/data
 
     smith
-    
-## Build using a Docker container ##
-
-Run the container mounting `smith.yaml` folder:
-
-```bash
-mkdir cat
-cd cat
-
-cat >smith.yaml <<EOF
-package: coreutils
-paths:
-- /usr/bin/cat
-cmd:
-- /usr/bin/cat
-- /read/data
-EOF
-
-mkdir -p rootfs/read
-echo "Hello World!" >rootfs/read/data
-```
-
-Build `smith.yml`:
-
-```bash
-docker run -it --rm \
---privileged -v $PWD:/write \
--v cache:/var/cache \
--v mock:/var/lib/mock vishvananda/smith
-```
-
-
-You can also use an alias to run smith commands from your host:
-
-```bash
-smith(){
-    docker run -it --rm \
-    --privileged -v $PWD:/write \
-    -v cache:/var/cache \
-    -v mock:/var/lib/mock vishvananda/smith $@
-}
-```
 
 Your image will be saved as image.tar.gz. You can change the name with a
 parameter:
