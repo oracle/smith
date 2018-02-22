@@ -243,6 +243,10 @@ details.
 Oracle gratefully acknowledges the contributions to smith that have been made
 by the community.
 
+## Getting in Touch ##
+
+The easiest way to get in touch is to join the [Smith channel](https://oraclecontainertools.slack.com/messages/C8BKS9HT5) in the [Oracle Container Tools workspace](https://oraclecontainertools.slack.com).
+
 ## License ##
 
 Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
