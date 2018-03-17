@@ -51,6 +51,7 @@ smith(){
     sudo docker run -it --rm \
     --privileged -v $PWD:/write \
     -v cache:/var/cache \
+    -v /tmp:/tmp
     -v mock:/var/lib/mock [<docker-repo-id>/]smith $@
 }
 ```
