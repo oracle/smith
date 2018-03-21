@@ -143,25 +143,39 @@ reinstalling the package.
 
 ## Building Microcontainers ##
 
-To build a container with `smith`, create a smith.yaml file and invoke smith with no
-parameters:
+To build a "hello world" container with `smith`:
+1. Create a new directory and cd to it
 
-    mkdir cat
-    cd cat
+```
+mkdir cat
+cd cat
+```
 
-    cat >smith.yaml <<EOF
-    package: coreutils
-    paths:
-    - /usr/bin/cat
-    cmd:
-    - /usr/bin/cat
-    - /read/data
-    EOF
+2. Create a `smith.yaml` file with the following contents:
+```
+package: coreutils
+paths:
+- /usr/bin/cat
+cmd:
+- /usr/bin/cat
+- /read/data
+```
 
-    mkdir -p rootfs/read
-    echo "Hello World!" >rootfs/read/data
+3. Create the rootfs directory.  Smith will put the contents of the `./rootfs` directory into the root directory of the image.
 
-    smith
+`mkdir rootfs`
+
+4. Create the `read` directory under rootfs
+
+`mkdir rootfs/read`
+
+5.  Create the file `data` under `rootfs/read` with the following content:
+
+`Hello World!`
+
+- invoke smith with no parameters:
+
+`smith`
 
 Your image will be saved as image.tar.gz. You can change the name with a
 parameter:
@@ -201,9 +215,9 @@ smith(){
 
 ## Advanced Usage ##
 
-For more detailed instructions on building containers, check out [How To Build
-a Tiny Httpd
-Container](https://hackernoon.com/how-to-build-a-tiny-httpd-container-ae622c37db39)
+For more detailed instructions on building containers, check out:
+- [Smith Lab](https://github.com/crush-157/smith-lab)
+- [How To Build a Tiny Httpd Container](https://hackernoon.com/how-to-build-a-tiny-httpd-container-ae622c37db39)
 
 ## Upload ##
 
